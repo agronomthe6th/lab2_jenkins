@@ -1,44 +1,24 @@
 pipeline {
-    agent any // Используйте метку агента, если хотите запускать на определенном слейве
-
-    environment {
-        // Установка переменных окружения, если это необходимо
-    }
+    agent none // Мы определим агента внутри каждого stage
 
     stages {
-        stage('Checkout') {
-            steps {
-                // Получаем исходный код из репозитория
-                checkout scm
-            }
-        }
         stage('Build') {
-            steps {
-                // Запускаем сборку в Docker контейнере
-                script {
-                    docker.image('gcc:latest').inside {
-                        sh 'make'
-                    }
+            agent {
+                docker {
+                    image 'gcc:latest'
+                    args '-v /usr/bin/docker:/usr/bin/docker' 
                 }
             }
-        }
-        stage('Archive') {
             steps {
-                // Архивируем бинарник
-                archiveArtifacts artifacts: 'main', onlyIfSuccessful: true
+                checkout scm // Получить исходный код из репозитория
+                sh 'make' // Сборка проекта с помощью Makefile
             }
         }
     }
-
     post {
         success {
-            echo 'Сборка прошла успешно!'
-        }
-        failure {
-            echo 'Сборка не удалась.'
-        }
-        always {
-            // Очистка после сборки, если это необходимо
+            archiveArtifacts artifacts: 'main', onlyIfSuccessful: true // Архивировать исполняемый файл main
         }
     }
 }
+
