@@ -1,0 +1,44 @@
+pipeline {
+    agent any // Используйте метку агента, если хотите запускать на определенном слейве
+
+    environment {
+        // Установка переменных окружения, если это необходимо
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Получаем исходный код из репозитория
+                checkout scm
+            }
+        }
+        stage('Build') {
+            steps {
+                // Запускаем сборку в Docker контейнере
+                script {
+                    docker.image('gcc:latest').inside {
+                        sh 'make'
+                    }
+                }
+            }
+        }
+        stage('Archive') {
+            steps {
+                // Архивируем бинарник
+                archiveArtifacts artifacts: 'main', onlyIfSuccessful: true
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Сборка прошла успешно!'
+        }
+        failure {
+            echo 'Сборка не удалась.'
+        }
+        always {
+            // Очистка после сборки, если это необходимо
+        }
+    }
+}
