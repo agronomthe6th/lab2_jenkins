@@ -18,8 +18,9 @@ pipeline {
 
     post {
         success {
-            script {
-                archiveArtifacts artifacts: 'main', onlyIfSuccessful: true
+            node {
+                // Внутри этого блока у вас есть доступ к контексту ноды
+                archiveArtifacts artifacts: 'main', onlyIfSuccessful: true // Архивировать исполняемый файл main
             }
         }
     }
