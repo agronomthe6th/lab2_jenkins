@@ -1,27 +1,25 @@
 pipeline {
-    agent none // Мы определим агента внутри каждого stage
+    agent none
 
     stages {
         stage('Build') {
             agent {
-                docker {
-                    image 'gcc:latest'
-                    args '-v /usr/bin/docker:/usr/bin/docker' 
-                }
+                docker { image 'gcc:latest' }
             }
             steps {
-                checkout scm // Получить исходный код из репозитория
-                sh 'make' // Сборка проекта с помощью Makefile
+                checkout scm
+                script {
+                    // Ваши шаги сборки
+                    sh 'make'
+                }
             }
         }
     }
 
     post {
         success {
-            script {
-                // Внутри этого блока у вас есть доступ к контексту ноды
-                archiveArtifacts artifacts: 'main', onlyIfSuccessful: true // Архивировать исполняемый файл main
-            }
+            // Ваши действия в случае успешной сборки
+            archiveArtifacts 'path/to/artifacts/*'
         }
     }
 }
