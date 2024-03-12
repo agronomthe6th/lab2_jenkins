@@ -1,16 +1,14 @@
 pipeline {
-    agent none
+    agent any
 
     stages {
         stage('Build') {
-            agent {
-                docker { image 'gcc:latest' }
-            }
             steps {
-                checkout scm
                 script {
-                    // Ваши шаги сборки
-                    sh 'make'
+                    checkout scm
+                    docker.image('gcc:latest').inside {
+                        sh 'make'
+                    }
                 }
             }
         }
@@ -18,7 +16,6 @@ pipeline {
 
     post {
         success {
-            // Ваши действия в случае успешной сборки
             archiveArtifacts 'path/to/artifacts/*'
         }
     }
